@@ -1,17 +1,25 @@
-
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { updateData, deleteData } from "../store/dataSlice";
+
+function calculateAge(dob) {
+  const dobDate = new Date(dob);
+  const today = new Date();
+  const diff = today - dobDate;
+  const ageDate = new Date(diff);
+  return Math.abs(ageDate.getUTCFullYear() - 1970);
+}
 
 function DataList() {
   const [editableItemId, setEditableItemId] = useState(null);
   const [editedData, setEditedData] = useState({});
   const dataList = useSelector((state) => state.dataList.dataList);
-
   const dispatch = useDispatch();
+
   console.log(dataList);
+
   if (!Array.isArray(dataList)) {
-    return <div>Loading...</div>; 
+    return <div>Loading...</div>;
   }
 
   const handleEdit = (id) => {
@@ -39,7 +47,7 @@ function DataList() {
             <th>Name</th>
             <th>Mobile Number</th>
             <th>Email</th>
-            <th>Date of Birth</th>
+            <th>Age</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -88,19 +96,7 @@ function DataList() {
                   data.email
                 )}
               </td>
-              <td>
-                {editableItemId === data.id ? (
-                  <input
-                    type="text"
-                    value={editedData.dob}
-                    onChange={(e) =>
-                      setEditedData({ ...editedData, dob: e.target.value })
-                    }
-                  />
-                ) : (
-                  data.dob
-                )}
-              </td>
+              <td>{calculateAge(data.dob)}</td>
               <td>
                 {editableItemId === data.id ? (
                   <button onClick={handleSave}>Save</button>
