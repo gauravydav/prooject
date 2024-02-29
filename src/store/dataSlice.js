@@ -1,16 +1,24 @@
 // store/dataSlice.js
 import { createSlice } from '@reduxjs/toolkit';
+import { nanoid } from '@reduxjs/toolkit'; // Import nanoid for generating unique IDs
 
 const initialState = {
   dataList: [],
 };
 
+
+
+
 export const dataSlice = createSlice({
   name: 'data',
   initialState,
   reducers: {
+    setData: (state, action) => {
+      state.dataList = action.payload;
+    },
     addData: (state, action) => {
-      state.dataList.push(action.payload);
+      const newItem = { ...action.payload, id: nanoid() }; // Generate unique ID for the new item
+      state.dataList.push(newItem);
     },
     updateData: (state, action) => {
       const { id, newData } = action.payload;
@@ -26,6 +34,6 @@ export const dataSlice = createSlice({
   },
 });
 
-export const { addData, updateData, deleteData } = dataSlice.actions;
+export const { setData, addData, updateData, deleteData } = dataSlice.actions;
 
 export default dataSlice.reducer;

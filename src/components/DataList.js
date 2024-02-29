@@ -1,43 +1,76 @@
-import React, { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { updateData, deleteData } from "../store/dataSlice";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setData,updateData } from "../store/dataSlice";
+import axios from "axios";
 
+// Function to calculate age from date of birth
 function calculateAge(dob) {
-  const dobDate = new Date(dob);
-  const today = new Date();
-  const diff = today - dobDate;
-  const ageDate = new Date(diff);
-  return Math.abs(ageDate.getUTCFullYear() - 1970);
+  const dobDate = new Date(dob); // Convert date of birth string to Date object
+  const today = new Date(); // Get current date
+  const diff = today - dobDate; // Calculate difference in milliseconds
+  const ageDate = new Date(diff); // Convert difference to Date object
+  return Math.abs(ageDate.getUTCFullYear() - 1970); // Return absolute difference in years
 }
 
 function DataList() {
-  const [editableItemId, setEditableItemId] = useState(null);
-  const [editedData, setEditedData] = useState({});
-  const dataList = useSelector((state) => state.dataList.dataList);
-  const dispatch = useDispatch();
+  const [editableItemId, setEditableItemId] = useState(null); // State for tracking editable item ID
+  const [editedData, setEditedData] = useState({}); // State for tracking edited data
+  const dataList = useSelector((state) => state.dataList.dataList); // Get data list from Redux store
+  const dispatch = useDispatch(); // Initialize dispatch function for Redux actions
 
-  console.log(dataList);
+  useEffect(() => {
+    // Fetch data from API when component mounts
+    axios.get("http://192.168.1.6:8083/fetch-phone-book?page=0&pageLength=10")
+      .then(response => {
+        // Dispatch action to update Redux store with fetched data
+        dispatch(setData(response.data));
+      })
+      .catch(error => {
+        console.error("Error fetching data:", error);
+      });
+  }, [dispatch]);
 
-  if (!Array.isArray(dataList)) {
-    return <div>Loading...</div>;
-  }
-
+  // Function to handle editing an item
   const handleEdit = (id) => {
-    setEditableItemId(id);
-    const itemToEdit = dataList.find((data) => data.id === id);
-    setEditedData(itemToEdit);
+    setEditableItemId(id); // Set the ID of the item being edited
+    const itemToEdit = dataList.find((data) => data.id === id); // Find the item to edit
+    setEditedData(itemToEdit); // Set the edited data
   };
 
+  // Function to handle saving edited data
   const handleSave = () => {
+    // Update data on the server
+    console.log(editedData)
     dispatch(updateData({ id: editableItemId, newData: editedData }));
-    setEditableItemId(null);
-    setEditedData({});
+    axios.post("http://192.168.1.6:8083/update-phone-book", editedData)
+      .then(response => {
+        // Update Redux store with updated data
+        dispatch(setData(response.data));
+      })
+      .catch(error => {
+        console.error("Error updating data:", error);
+      });
+
+    setEditableItemId(null); // Clear editable item ID
+    setEditedData({}); // Clear edited data
   };
 
+  // Function to handle deleting an item
   const handleDelete = (id) => {
-    dispatch(deleteData(id));
+    // Delete data on the server
+    dispatch(setData(dataList.filter(data => data.id !== id)));
+    console.log(id)
+    axios.delete(`http://192.168.1.6:8083/delete-phone-book/${id}`)
+      .then(() => {
+        // Remove deleted item from Redux store
+      
+      })
+      .catch(error => {
+        console.error("Error deleting data:", error);
+      });
   };
 
+  
   return (
     <div>
       <h2>Data List</h2>
@@ -87,13 +120,13 @@ function DataList() {
                 {editableItemId === data.id ? (
                   <input
                     type="text"
-                    value={editedData.email}
+                    value={editedData.emailId}
                     onChange={(e) =>
-                      setEditedData({ ...editedData, email: e.target.value })
+                      setEditedData({ ...editedData, emailId: e.target.value })
                     }
                   />
                 ) : (
-                  data.email
+                  data.emailId
                 )}
               </td>
               <td>{calculateAge(data.dob)}</td>
