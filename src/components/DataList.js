@@ -40,20 +40,21 @@ function DataList() {
   // Function to handle saving edited data
   const handleSave = () => {
     // Update data on the server
-    console.log(editedData)
-    dispatch(updateData({ id: editableItemId, newData: editedData }));
-    axios.post("http://192.168.1.6:8083/update-phone-book", editedData)
+    console.log(editedData);
+    console.log(editableItemId)
+    axios.put(`http://192.168.1.6:8083/update-phone-book/${editableItemId}`, editedData)
       .then(response => {
-     
+        dispatch(updateData({ id: editableItemId, newData: response.data }));
         dispatch(setData(response.data));
       })
       .catch(error => {
         console.error("Error updating data:", error);
       });
-
+  
     setEditableItemId(null); // Clear editable item ID
     setEditedData({}); // Clear edited data
   };
+  
 
   // Function to handle deleting an item
   const handleDelete = (id) => {

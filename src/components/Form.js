@@ -23,12 +23,15 @@ function DataForm() {
     name: Yup.string().required('Name is required').matches(/^[a-zA-Z0-9]+$/, 'Name should not contain special characters'),
     mobileNumber: Yup.string().required('Mobile Number is required').matches(/^[6-9]\d{9}$/, 'Invalid Mobile Number'),
     emailId: Yup.string().required('emailId is required').email('Invalid emailId'),
-    dob: Yup.string().required('Date of Birth is required').matches(/^\d{2}-\d{2}-\d{4}$/, 'Invalid Date of Birth (DD-MM-YYYY)'),
+    dob: Yup.date().required('Date of Birth is required'), 
   });
 
   // Handle form submission
   const handleSubmit = (values, { resetForm }) => {
-    handleAdd(values)
+    const newDataWithoutId = { ...values };
+  delete newDataWithoutId.id;
+
+  handleAdd(newDataWithoutId);
     dispatch(addData(values)); // Dispatch action to add data to Redux store
     resetForm(); // Reset form fields after submission
   };
@@ -74,7 +77,7 @@ const handleAdd = (newData) => {
             {/* Input fields for date of birth */}
             <div>
               <label htmlFor="dob">Date of Birth (DD-MM-YYYY)</label>
-              <Field type="text" id="dob" name="dob" />
+              <Field type="date" id="dob" name="dob" />
               <ErrorMessage name="dob" component="div" className="error" />
             </div>
             {/* Submit button */}

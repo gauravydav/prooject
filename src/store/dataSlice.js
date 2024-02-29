@@ -17,7 +17,7 @@ export const dataSlice = createSlice({
       state.dataList = action.payload;
     },
     addData: (state, action) => {
-      const newItem = { ...action.payload, id: nanoid() }; // Generate unique ID for the new item
+      const newItem = { ...action.payload }; // Generate unique ID for the new item
       state.dataList.push(newItem);
     },
     updateData: (state, action) => {
