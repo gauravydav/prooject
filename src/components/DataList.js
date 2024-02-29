@@ -44,7 +44,7 @@ function DataList() {
     dispatch(updateData({ id: editableItemId, newData: editedData }));
     axios.post("http://192.168.1.6:8083/update-phone-book", editedData)
       .then(response => {
-        // Update Redux store with updated data
+     
         dispatch(setData(response.data));
       })
       .catch(error => {
@@ -62,7 +62,7 @@ function DataList() {
     console.log(id)
     axios.delete(`http://192.168.1.6:8083/delete-phone-book/${id}`)
       .then(() => {
-        // Remove deleted item from Redux store
+    
       
       })
       .catch(error => {
