@@ -1,91 +1,154 @@
-import React from 'react';
-import { Formik, Form, Field, ErrorMessage } from 'formik'; // Import necessary components from Formik library
-import * as Yup from 'yup'; // Import Yup for validation
-import { useDispatch,useSelector } from 'react-redux';
-import { addData } from '../store/dataSlice';
+import React from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { useDispatch, useSelector } from "react-redux";
+import { addData } from "../store/dataSlice";
 import { setData } from "../store/dataSlice";
 import axios from "axios";
+import {
+  TextField,
+  Button,
+  Card,
+  CardContent,
+  Typography,
+  Box,
+} from "@mui/material";
+
+const styles = {
+  card: {
+    maxWidth: 400,
+    margin: "auto",
+    marginTop: 50,
+    padding: 20,
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+  },
+};
 
 function DataForm() {
   const dispatch = useDispatch();
   const dataList = useSelector((state) => state.dataList.dataList);
 
-  // Define initial form values
   const initialValues = {
-    name: '',
-    mobileNumber: '',
-    emailId: '',
-    dob: '',
+    name: "",
+    mobileNumber: "",
+    emailId: "",
+    dob: "",
   };
 
-  // Define validation schema using Yup
   const validationSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required').matches(/^[a-zA-Z0-9]+$/, 'Name should not contain special characters'),
-    mobileNumber: Yup.string().required('Mobile Number is required').matches(/^[6-9]\d{9}$/, 'Invalid Mobile Number'),
-    emailId: Yup.string().required('emailId is required').email('Invalid emailId'),
-    dob: Yup.date().required('Date of Birth is required'), 
+    name: Yup.string()
+      .required("Name is required")
+      .matches(/^[a-zA-Z0-9]+$/, "Name should not contain special characters"),
+    mobileNumber: Yup.string()
+      .required("Mobile Number is required")
+      .matches(/^[6-9]\d{9}$/, "Invalid Mobile Number"),
+    emailId: Yup.string()
+      .required("Email is required")
+      .email("Invalid emailId"),
+    dob: Yup.date().required("Date of Birth is required"),
   });
 
-  // Handle form submission
   const handleSubmit = (values, { resetForm }) => {
     const newDataWithoutId = { ...values };
-  delete newDataWithoutId.id;
+    delete newDataWithoutId.id;
 
-  handleAdd(newDataWithoutId);
-    dispatch(addData(values)); // Dispatch action to add data to Redux store
-    resetForm(); // Reset form fields after submission
+    handleAdd(newDataWithoutId);
+    dispatch(addData(values));
+    resetForm();
   };
-// Function to handle adding new data
-const handleAdd = (newData) => {
-    console.log(newData)
-    // Add data on the server
-    axios.post("http://192.168.1.6:8083/add-phone-book", newData)
-      .then(response => {
-        // Update Redux store with added data
+
+  const handleAdd = (newData) => {
+    axios
+      .post("http://192.168.1.6:8083/add-phone-book", newData)
+      .then((response) => {
         dispatch(setData([...dataList, response.data]));
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error adding data:", error);
       });
   };
 
   return (
-    <div>
-      <h2>Add Data</h2>
-      {/* Formik component to manage form state */}
-      <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
-        {({ errors, touched }) => (
-          <Form>
-            {/* Input fields for name */}
-            <div>
-              <label htmlFor="name">Name</label>
-              <Field type="text" id="name" name="name" />
-              <ErrorMessage name="name" component="div" className="error" />
-            </div>
-            {/* Input fields for mobile number */}
-            <div>
-              <label htmlFor="mobileNumber">Mobile Number</label>
-              <Field type="text" id="mobileNumber" name="mobileNumber" />
-              <ErrorMessage name="mobileNumber" component="div" className="error" />
-            </div>
-            {/* Input fields for emailId */}
-            <div>
-              <label htmlFor="emailId">emailId</label>
-              <Field type="text" id="emailId" name="emailId" />
-              <ErrorMessage name="emailId" component="div" className="error" />
-            </div>
-            {/* Input fields for date of birth */}
-            <div>
-              <label htmlFor="dob">Date of Birth (DD-MM-YYYY)</label>
-              <Field type="date" id="dob" name="dob" />
-              <ErrorMessage name="dob" component="div" className="error" />
-            </div>
-            {/* Submit button */}
-            <button type="submit">Submit</button>
-          </Form>
-        )}
-      </Formik>
-    </div>
+    <Card style={styles.card}>
+      <CardContent>
+        <Typography variant="h5" component="div">
+          Add Data
+        </Typography>
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ errors, touched }) => (
+            <Form style={styles.form}>
+              <Box>
+                <label htmlFor="name">Name</label>
+                <Field
+                  as={TextField}
+                  type="text"
+                  id="name"
+                  name="name"
+                  size="small"
+                  fullWidth
+                />
+                <ErrorMessage name="name" component="div" className="error" />
+              </Box>
+              <Box>
+                <label htmlFor="mobileNumber">Mobile Number</label>
+                <Field
+                  as={TextField}
+                  type="text"
+                  id="mobileNumber"
+                  name="mobileNumber"
+                  size="small"
+                  fullWidth
+                />
+                <ErrorMessage
+                  name="mobileNumber"
+                  component="div"
+                  className="error"
+                />
+              </Box>
+              <Box>
+                <label htmlFor="emailId">Email</label>
+                <Field
+                  as={TextField}
+                  type="text"
+                  id="emailId"
+                  name="emailId"
+                  size="small"
+                  fullWidth
+                />
+                <ErrorMessage
+                  name="emailId"
+                  component="div"
+                  className="error"
+                />
+              </Box>
+              <Box>
+                <label htmlFor="dob">Date of Birth (DD-MM-YYYY)</label>
+                <Field
+                  as={TextField}
+                  type="date"
+                  id="dob"
+                  name="dob"
+                  size="small"
+                  fullWidth
+                />
+                <ErrorMessage name="dob" component="div" className="error" />
+              </Box>
+              <Button type="submit" variant="contained" color="primary">
+                Submit
+              </Button>
+            </Form>
+          )}
+        </Formik>
+      </CardContent>
+    </Card>
   );
 }
 
