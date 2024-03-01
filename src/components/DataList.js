@@ -20,7 +20,7 @@ import {
   Grid,
 } from "@mui/material";
 import TablePagination from "@mui/material/TablePagination";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function calculateAge(dob) {
   const dobDate = new Date(dob);
@@ -32,7 +32,12 @@ function calculateAge(dob) {
 
 function DataList() {
   const [editableItemId, setEditableItemId] = useState(null);
-  const [dialogData, setDialogData] = useState({ name: "", mobileNumber: "", emailId: "", dob: "" });
+  const [dialogData, setDialogData] = useState({
+    name: "",
+    mobileNumber: "",
+    emailId: "",
+    dob: "",
+  });
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(3);
   const [updatedData, setUpdatedData] = useState([]);
@@ -80,7 +85,10 @@ function DataList() {
 
   const handleSave = () => {
     axios
-      .put(`http://localhost:5001/update-phone-book/${editableItemId}`, dialogData)
+      .put(
+        `http://localhost:5001/update-phone-book/${editableItemId}`,
+        dialogData
+      )
       .then((response) => {
         dispatch(updateData({ _id: editableItemId, newData: response.data }));
         fetchData();
@@ -103,15 +111,32 @@ function DataList() {
   };
 
   if (updatedData.length <= 0) {
-    return <h1>Helloooo</h1>;
+    return (
+      <h1>
+        Helloooo, please add something from <Link to="/">here</Link>
+      </h1>
+    );
   }
 
   return (
     <div>
-      <h2>Data List</h2>
-      <Button variant="contained" color="primary" onClick={() => navigate("/")}>
-        Add Info
-      </Button>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <h2>Data List</h2>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate("/")}
+          style={{ marginRight: "2rem" }}
+        >
+          Add Info
+        </Button>
+      </div>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -125,7 +150,10 @@ function DataList() {
           </TableHead>
           <TableBody>
             {(rowsPerPage > 0
-              ? updatedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              ? updatedData.slice(
+                  page * rowsPerPage,
+                  page * rowsPerPage + rowsPerPage
+                )
               : updatedData
             ).map((data) => (
               <TableRow key={data._id}>
@@ -136,7 +164,9 @@ function DataList() {
                 <TableCell>
                   <>
                     <Button onClick={() => handleEdit(data._id)}>Edit</Button>
-                    <Button onClick={() => handleDelete(data._id)}>Delete</Button>
+                    <Button onClick={() => handleDelete(data._id)}>
+                      Delete
+                    </Button>
                   </>
                 </TableCell>
               </TableRow>
@@ -163,7 +193,9 @@ function DataList() {
               <Typography>Name:</Typography>
               <Input
                 value={dialogData.name || ""}
-                onChange={(e) => setDialogData({ ...dialogData, name: e.target.value })}
+                onChange={(e) =>
+                  setDialogData({ ...dialogData, name: e.target.value })
+                }
                 placeholder="Name"
                 fullWidth
               />
@@ -172,7 +204,9 @@ function DataList() {
               <Typography>Mobile Number:</Typography>
               <Input
                 value={dialogData.mobileNumber || ""}
-                onChange={(e) => setDialogData({ ...dialogData, mobileNumber: e.target.value })}
+                onChange={(e) =>
+                  setDialogData({ ...dialogData, mobileNumber: e.target.value })
+                }
                 placeholder="Mobile Number"
                 fullWidth
               />
@@ -181,7 +215,9 @@ function DataList() {
               <Typography>Email:</Typography>
               <Input
                 value={dialogData.emailId || ""}
-                onChange={(e) => setDialogData({ ...dialogData, emailId: e.target.value })}
+                onChange={(e) =>
+                  setDialogData({ ...dialogData, emailId: e.target.value })
+                }
                 placeholder="Email"
                 fullWidth
               />
@@ -198,8 +234,12 @@ function DataList() {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="secondary">Cancel</Button>
-          <Button onClick={handleSave} color="primary">Save</Button>
+          <Button onClick={handleClose} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleSave} color="primary">
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
     </div>

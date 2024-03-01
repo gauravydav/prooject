@@ -197,7 +197,7 @@ function DataForm() {
               <Box style={styles.buttonContainer}>
                 <Button
                   variant="contained"
-                  color="primary"
+                  color="secondary"
                   onClick={handleViewTable}
                 >
                   View Table
