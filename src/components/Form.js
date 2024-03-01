@@ -15,7 +15,6 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 
-
 const styles = {
   card: {
     maxWidth: 400,
@@ -28,12 +27,32 @@ const styles = {
     flexDirection: "column",
     gap: "20px",
   },
+  inputContainer: {
+    display: "flex",
+    alignItems: "center",
+  },
+  label: {
+    marginRight: 10,
+    width: 120,
+    textAlign: "right",
+  },
+  error: {
+    color: "red",
+  },
+  buttonContainer: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  centered: {
+    textAlign: "center",
+  },
 };
 
 function DataForm() {
   const dispatch = useDispatch();
   const dataList = useSelector((state) => state.dataList.dataList);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const initialValues = {
     name: "",
@@ -45,7 +64,10 @@ function DataForm() {
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .required("Name is required")
-      .matches(/^[a-zA-Z0-9]+$/, "Name should not contain special characters"),
+      .matches(
+        /^[a-zA-Z0-9\s]+$/,
+        "Name should not contain special characters"
+      ),
     mobileNumber: Yup.string()
       .required("Mobile Number is required")
       .matches(/^[6-9]\d{9}$/, "Invalid Mobile Number"),
@@ -54,6 +76,7 @@ function DataForm() {
       .email("Invalid emailId"),
     dob: Yup.date().required("Date of Birth is required"),
   });
+
   const handleViewTable = () => {
     navigate("/datalist");
   };
@@ -63,13 +86,13 @@ function DataForm() {
     delete newDataWithoutId.id;
 
     handleAdd(newDataWithoutId);
-   
+
     resetForm();
   };
 
   const handleAdd = (newData) => {
     axios
-      .post("http://localhost:5000/add-phone-book", newData)
+      .post("http://localhost:5001/add-phone-book", newData)
       .then((response) => {
         dispatch(setData([...dataList, response.data]));
       })
@@ -81,7 +104,7 @@ function DataForm() {
   return (
     <Card style={styles.card}>
       <CardContent>
-        <Typography variant="h5" component="div">
+        <Typography variant="h5" component="div" style={styles.centered}>
           Add Data
         </Typography>
         <Formik
@@ -91,8 +114,10 @@ function DataForm() {
         >
           {() => (
             <Form style={styles.form}>
-              <Box>
-                <label htmlFor="name">Name</label>
+              <Box style={{ ...styles.inputContainer, ...styles.centered }}>
+                <label htmlFor="name" style={styles.label}>
+                  Name:
+                </label>
                 <Field
                   as={TextField}
                   type="text"
@@ -101,10 +126,18 @@ function DataForm() {
                   size="small"
                   fullWidth
                 />
-                <ErrorMessage name="name" component="div" className="error" />
               </Box>
-              <Box>
-                <label htmlFor="mobileNumber">Mobile Number</label>
+              <ErrorMessage
+                name="name"
+                component="div"
+                className="error"
+                style={styles.error}
+              />
+
+              <Box style={{ ...styles.inputContainer, ...styles.centered }}>
+                <label htmlFor="mobileNumber" style={styles.label}>
+                  Contact no.:
+                </label>
                 <Field
                   as={TextField}
                   type="text"
@@ -113,14 +146,18 @@ function DataForm() {
                   size="small"
                   fullWidth
                 />
-                <ErrorMessage
-                  name="mobileNumber"
-                  component="div"
-                  className="error"
-                />
               </Box>
-              <Box>
-                <label htmlFor="emailId">Email</label>
+              <ErrorMessage
+                name="mobileNumber"
+                component="div"
+                className="error"
+                style={styles.error}
+              />
+
+              <Box style={{ ...styles.inputContainer, ...styles.centered }}>
+                <label htmlFor="emailId" style={styles.label}>
+                  Email:
+                </label>
                 <Field
                   as={TextField}
                   type="text"
@@ -129,14 +166,18 @@ function DataForm() {
                   size="small"
                   fullWidth
                 />
-                <ErrorMessage
-                  name="emailId"
-                  component="div"
-                  className="error"
-                />
               </Box>
-              <Box>
-                <label htmlFor="dob">Date of Birth (DD-MM-YYYY)</label>
+              <ErrorMessage
+                name="emailId"
+                component="div"
+                className="error"
+                style={styles.error}
+              />
+
+              <Box style={{ ...styles.inputContainer, ...styles.centered }}>
+                <label htmlFor="dob" style={styles.label}>
+                  DOB:
+                </label>
                 <Field
                   as={TextField}
                   type="date"
@@ -145,16 +186,27 @@ function DataForm() {
                   size="small"
                   fullWidth
                 />
-                <ErrorMessage name="dob" component="div" className="error" />
               </Box>
-              <Button type="submit" variant="contained" color="primary">
-                Submit
-              </Button>
-              <Button variant="contained" color="primary" onClick={handleViewTable}>
-                View Table
-              </Button>
+              <ErrorMessage
+                name="dob"
+                component="div"
+                className="error"
+                style={styles.error}
+              />
+
+              <Box style={styles.buttonContainer}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleViewTable}
+                >
+                  View Table
+                </Button>
+                <Button type="submit" variant="contained" color="primary">
+                  Submit
+                </Button>
+              </Box>
             </Form>
-            
           )}
         </Formik>
       </CardContent>
