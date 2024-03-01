@@ -1,152 +1,169 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setData,updateData } from "../store/dataSlice";
+import { setData, updateData } from "../store/dataSlice";
 import axios from "axios";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Input, Button } from "@mui/material";
+import TablePagination from "@mui/material/TablePagination";
+import { useNavigate } from "react-router-dom"; 
 
-// Function to calculate age from date of birth
 function calculateAge(dob) {
-  const dobDate = new Date(dob); // Convert date of birth string to Date object
-  const today = new Date(); // Get current date
-  const diff = today - dobDate; // Calculate difference in milliseconds
-  const ageDate = new Date(diff); // Convert difference to Date object
-  return Math.abs(ageDate.getUTCFullYear() - 1970); // Return absolute difference in years
+  const dobDate = new Date(dob);
+  const today = new Date();
+  const diff = today - dobDate;
+  const ageDate = new Date(diff);
+  return Math.abs(ageDate.getUTCFullYear() - 1970);
 }
 
 function DataList() {
-  const [editableItemId, setEditableItemId] = useState(null); // State for tracking editable item ID
-  const [editedData, setEditedData] = useState({}); // State for tracking edited data
-  const dataList = useSelector((state) => state.dataList.dataList); // Get data list from Redux store
-  const dispatch = useDispatch(); // Initialize dispatch function for Redux actions
+  const [editableItemId, setEditableItemId] = useState(null);
+  const [editedData, setEditedData] = useState({});
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(3);
+  const [updatedData, setUpdatedData] = useState([]);
+  // const dataList = useSelector((state) => state.dataList.dataList);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    // Fetch data from API when component mounts
-    axios.get("http://192.168.1.6:8083/fetch-phone-book?page=0&pageLength=10")
+  const fetchData = () => {
+    axios.get("http://localhost:5000/get-all-entries")
       .then(response => {
-        // Dispatch action to update Redux store with fetched data
         dispatch(setData(response.data));
+        setUpdatedData(response.data);
       })
       .catch(error => {
         console.error("Error fetching data:", error);
       });
-  }, [dispatch]);
-
-  // Function to handle editing an item
-  const handleEdit = (id) => {
-    setEditableItemId(id); // Set the ID of the item being edited
-    const itemToEdit = dataList.find((data) => data.id === id); // Find the item to edit
-    setEditedData(itemToEdit); // Set the edited data
   };
 
-  // Function to handle saving edited data
+  useEffect(() => {
+    fetchData();
+  }, [dispatch, editableItemId]);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleEdit = (id) => {
+    setEditableItemId(id);
+    const itemToEdit = updatedData.find((data) => data._id === id);
+    setEditedData(itemToEdit || {});
+  };
+
   const handleSave = () => {
-    // Update data on the server
-    console.log(editedData);
-    console.log(editableItemId)
-    axios.put(`http://192.168.1.6:8083/update-phone-book/${editableItemId}`, editedData)
+    axios.put(`http://localhost:5000/update-phone-book/${editableItemId}`, editedData)
       .then(response => {
-        dispatch(updateData({ id: editableItemId, newData: response.data }));
-        dispatch(setData(response.data));
+        dispatch(updateData({ _id: editableItemId, newData: response.data }));
+        // dispatch(setData(response.data));
+        fetchData();
       })
       .catch(error => {
         console.error("Error updating data:", error);
       });
-  
-    setEditableItemId(null); // Clear editable item ID
-    setEditedData({}); // Clear edited data
-  };
-  
 
-  // Function to handle deleting an item
+    setEditableItemId(null);
+    setEditedData({});
+  };
+
   const handleDelete = (id) => {
-    // Delete data on the server
-    dispatch(setData(dataList.filter(data => data.id !== id)));
-    console.log(id)
-    axios.delete(`http://192.168.1.6:8083/delete-phone-book/${id}`)
+    axios.delete(`http://localhost:5000/delete-phone-book/${id}`)
       .then(() => {
-    
-      
+        fetchData();
       })
       .catch(error => {
         console.error("Error deleting data:", error);
       });
+  };const handleAddInfo = () => {
+    navigate('/');
   };
 
-  
+  if (updatedData.length <= 0) {
+    return <h1>Helloooo</h1>;
+  }
+
   return (
     <div>
       <h2>Data List</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Mobile Number</th>
-            <th>Email</th>
-            <th>Age</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {dataList?.map((data) => (
-            <tr key={data.id}>
-              <td>
-                {editableItemId === data.id ? (
-                  <input
-                    type="text"
-                    value={editedData.name}
-                    onChange={(e) =>
-                      setEditedData({ ...editedData, name: e.target.value })
-                    }
-                  />
-                ) : (
-                  data.name
-                )}
-              </td>
-              <td>
-                {editableItemId === data.id ? (
-                  <input
-                    type="text"
-                    value={editedData.mobileNumber}
-                    onChange={(e) =>
-                      setEditedData({
-                        ...editedData,
-                        mobileNumber: e.target.value,
-                      })
-                    }
-                  />
-                ) : (
-                  data.mobileNumber
-                )}
-              </td>
-              <td>
-                {editableItemId === data.id ? (
-                  <input
-                    type="text"
-                    value={editedData.emailId}
-                    onChange={(e) =>
-                      setEditedData({ ...editedData, emailId: e.target.value })
-                    }
-                  />
-                ) : (
-                  data.emailId
-                )}
-              </td>
-              <td>{calculateAge(data.dob)}</td>
-              <td>
-                {editableItemId === data.id ? (
-                  <button onClick={handleSave}>Save</button>
-                ) : (
-                  <>
-                    <button onClick={() => handleEdit(data.id)}>Edit</button>
-                    <button onClick={() => handleDelete(data.id)}>
-                      Delete
-                    </button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <Button variant="contained" color="primary" onClick={handleAddInfo}>
+        Add Info
+      </Button>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Mobile Number</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Age</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {(rowsPerPage > 0
+              ? updatedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              : updatedData
+            ).map((data) => (
+              <TableRow key={data._id}>
+                <TableCell>
+                  {editableItemId === data._id ? (
+                    <Input
+                      value={editedData.name || ''}
+                      onChange={(e) => setEditedData({ ...editedData, name: e.target.value })}
+                    />
+                  ) : (
+                    data.name || ''
+                  )}
+                </TableCell>
+                <TableCell>
+                  {editableItemId === data._id ? (
+                    <Input
+                      value={editedData.mobileNumber || ''}
+                      onChange={(e) => setEditedData({ ...editedData, mobileNumber: e.target.value })}
+                    />
+                  ) : (
+                    data.mobileNumber || ''
+                  )}
+                </TableCell>
+                <TableCell>
+                  {editableItemId === data._id ? (
+                    <Input
+                      value={editedData.emailId || ''}
+                      onChange={(e) => setEditedData({ ...editedData, emailId: e.target.value })}
+                    />
+                  ) : (
+                    data.emailId || ''
+                  )}
+                </TableCell>
+                <TableCell>{calculateAge(data.dob)}</TableCell>
+                <TableCell>
+                  {editableItemId === data._id ? (
+                    <Button onClick={handleSave}>Save</Button>
+                  ) : (
+                    <>
+                      <Button onClick={() => handleEdit(data._id)}>Edit</Button>
+                      <Button onClick={() => handleDelete(data._id)}>Delete</Button>
+                    </>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      
+      <TablePagination
+        rowsPerPageOptions={[3, 6, 9]}
+        component="div"
+        count={updatedData.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
     </div>
   );
 }

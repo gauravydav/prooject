@@ -13,6 +13,8 @@ import {
   Typography,
   Box,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+
 
 const styles = {
   card: {
@@ -31,6 +33,7 @@ const styles = {
 function DataForm() {
   const dispatch = useDispatch();
   const dataList = useSelector((state) => state.dataList.dataList);
+  const navigate = useNavigate(); 
 
   const initialValues = {
     name: "",
@@ -51,19 +54,22 @@ function DataForm() {
       .email("Invalid emailId"),
     dob: Yup.date().required("Date of Birth is required"),
   });
+  const handleViewTable = () => {
+    navigate("/datalist");
+  };
 
   const handleSubmit = (values, { resetForm }) => {
     const newDataWithoutId = { ...values };
     delete newDataWithoutId.id;
 
     handleAdd(newDataWithoutId);
-    dispatch(addData(values));
+   
     resetForm();
   };
 
   const handleAdd = (newData) => {
     axios
-      .post("http://192.168.1.6:8083/add-phone-book", newData)
+      .post("http://localhost:5000/add-phone-book", newData)
       .then((response) => {
         dispatch(setData([...dataList, response.data]));
       })
@@ -83,7 +89,7 @@ function DataForm() {
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ errors, touched }) => (
+          {() => (
             <Form style={styles.form}>
               <Box>
                 <label htmlFor="name">Name</label>
@@ -144,7 +150,11 @@ function DataForm() {
               <Button type="submit" variant="contained" color="primary">
                 Submit
               </Button>
+              <Button variant="contained" color="primary" onClick={handleViewTable}>
+                View Table
+              </Button>
             </Form>
+            
           )}
         </Formik>
       </CardContent>
